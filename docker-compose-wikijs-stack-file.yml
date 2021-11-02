@@ -1,3 +1,4 @@
+# wiki-js + NFS volumes docker compose file ready to deploy in docker swarm as a stack
 ---
 version: "3.7"
 services:
