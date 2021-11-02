@@ -1,0 +1,42 @@
+---
+version: "3.7"
+services:
+  pgsql_db:
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_DB: wikijs
+      POSTGRES_PASSWORD: wikijs
+      POSTGRES_USER: wikijs
+    logging:
+      driver: "none"
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+  wiki:
+    image: requarks/wiki:2
+    depends_on:
+      - pgsql_db
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: pgsql_db
+      DB_PORT: 5432
+      DB_USER: wikijs
+      DB_PASS: wikijs
+      DB_NAME: wikijs
+    ports:
+      - "80:3000"
+    volumes:
+      - "wiki-js:/config"
+      - "wiki-js:/data"
+volumes:
+  db-data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: nfsvers=4,addr=10.6.131.60,rw
+      device: ":/storage/docker/wiki/volumes/db-data"
+  wiki-js:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: nfsvers=4,addr=10.6.131.60,rw
+      device: ":/storage/docker/wiki/volumes/wiki-js"   
