@@ -1,0 +1,49 @@
+# teampass + NFS volumes docker compose file ready to deploy in docker swarm as a stack
+---
+version: "3.7"
+services:
+  db: 
+      image: mysql/mysql-server:5.7
+      ports:
+        - "3306:3306"
+      volumes:
+        - "db:/var/lib/mysql"
+      environment:
+        MYSQL_DATABASE: teampass
+        MYSQL_PASSWORD: teampass
+        MYSQL_ROOT_PASSWORD: rootpass
+        MYSQL_USER: teampass
+  teampass:
+      image: teampass/teampass
+      ports:
+        - "9555:80"
+      volumes:
+        - "teampass:/var/www/html"
+      depends_on:
+        - db
+  phpmyadmin:
+      image: phpmyadmin/phpmyadmin
+      environment:
+        PMA_HOST: db
+        PMA_PORT: 3306
+        PMA_ARBITRARY: 1
+      ports:
+        - "8081:80"
+      depends_on:
+        - db
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: nfsvers=4,addr=10.6.131.60,rw
+      device: ":/storage/docker/teampass/volumes/db"
+  teampass:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: nfsvers=4,addr=10.6.131.60,rw
+      device: ":/storage/docker/teampass/volumes/teampass"   
+networks:
+  default:
+    name: teamnet
