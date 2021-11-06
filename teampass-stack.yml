@@ -21,16 +21,6 @@ services:
         - "teampass:/var/www/html"
       depends_on:
         - db
-  phpmyadmin:
-      image: phpmyadmin/phpmyadmin
-      environment:
-        PMA_HOST: db
-        PMA_PORT: 3306
-        PMA_ARBITRARY: 1
-      ports:
-        - "8081:80"
-      depends_on:
-        - db
 volumes:
   db:
     driver: local
@@ -44,6 +34,8 @@ volumes:
       type: nfs
       o: nfsvers=4,addr=10.6.131.60,rw
       device: ":/storage/docker/teampass/volumes/teampass"   
-networks:
-  default:
-    name: teamnet
+#networks:
+#  teampass:
+#  driver: overlay
+#  name: teampass
+    
