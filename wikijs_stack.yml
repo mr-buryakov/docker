@@ -1,6 +1,6 @@
 # wiki-js + NFS volumes docker compose file ready to deploy in docker swarm as a stack
 ---
-version: "3.7"
+version: "3.8"
 services:
   pgsql_db:
     image: postgres:11-alpine
@@ -12,6 +12,14 @@ services:
       driver: "none"
     volumes:
       - "db-data:/var/lib/postgresql/data"
+  cron:
+    image: postgres:11-alpine
+    command: crond -f -l 8
+    volumes:
+      - "backups:/mnt/backups"
+      - "crontab:/etc/periodic/weekly/:ro"
+    depends_on:
+      - pgsql_db
   wiki:
     image: requarks/wiki:2
     depends_on:
@@ -34,10 +42,22 @@ volumes:
     driver_opts:
       type: nfs
       o: nfsvers=4,addr=10.6.131.60,rw
-      device: ":/storage/docker/wiki/volumes/db-data"
+      device: ":/storage/docker/wiki-js/volumes/db-data"
+  backups:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: nfsvers=4,addr=10.6.131.60,rw
+      device: ":/storage/backups/wikijs"
+  crontab:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: nfsvers=4,addr=10.6.131.60,rw
+      device: ":/storage/docker/wiki-js/volumes/crontab"
   wiki-js:
     driver: local
     driver_opts:
       type: nfs
       o: nfsvers=4,addr=10.6.131.60,rw
-      device: ":/storage/docker/wiki/volumes/wiki-js"   
+      device: ":/storage/docker/wiki-js/volumes/wiki-js"
